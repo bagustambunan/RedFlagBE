@@ -134,3 +134,24 @@ def getUserFavFoodCat(user_id):
                 cursor.close()
                 connection.close()
     return False  # Return False if the connection or cursor is None
+
+def getFoodById(food_id):
+    connection = get_connection()
+    if connection is not None:
+        cursor = get_cursor(connection)
+        if cursor is not None:
+            try:
+                # Query to check if the email and hashed password exists
+                sql = """
+                SELECT * FROM h_food WHERE food_id = %s
+                """
+                cursor.execute(sql, (food_id,))
+                result = cursor.fetchone()
+                return result  # Return the result (None if no user found)
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                return None  # Return None to indicate an error occurred
+            finally:
+                cursor.close()
+                connection.close()
+    return None

@@ -2,7 +2,7 @@ from application import app
 import json
 from flask import Flask,request,jsonify
 from application.models.userModels import checkToken,updateUserBMI
-from application.models.foodModels import getFoodCat,createUserFavFoodCat,getUserFavFoodCat,updateUserFavFoodCat,getFood,getFilterFood
+from application.models.foodModels import getFoodCat,createUserFavFoodCat,getUserFavFoodCat,updateUserFavFoodCat,getFood,getFilterFood,getFoodById
 
 @app.route('/foodCat', methods = ['POST'])
 def foodCat():
@@ -28,9 +28,9 @@ def food():
         for item in food:
             item_list = list(item)  # Convert tuple to list
             item_list[2] = json.loads(item_list[2])  # Decode the JSON string
-            
             # Create cleaned data object
             cleaned_data = {
+                "foodId": item_list[0],
                 "foodName": item_list[1],
                 "foodCat": item_list[2],
                 "foodCal": item_list[3],
@@ -41,6 +41,33 @@ def food():
             "food": cleaned_food_data
         }
         return jsonify({"message": "Success","data":data,"rc":"00"}), 200
+    else:
+        return jsonify({"error": "Unauthorized Access","rc":"500"}), 400
+
+@app.route('/getFoodById', methods = ['POST'])
+def getFoodId():
+    token = request.form['token']
+    data = checkToken(token)
+    if data is not None:
+        foodId = request.form['foodId']
+        print(foodId)
+        food = getFoodById(foodId)
+        if food is not None :
+            foodCat = json.loads(food[2])  # Parse JSON string into a list
+            foodCat = list(set(foodCat))
+
+            cleaned_data = {
+                "foodId": food[0],
+                "foodName": food[1],
+                "foodCat": foodCat,
+                "foodCal": food[3],
+            }
+            data = {
+                "food": cleaned_data
+            }
+            return jsonify({"message": "Success","data":data,"rc":"00"}), 200
+        else:
+            return jsonify({"error": "Data not found","rc":"404"}), 404
     else:
         return jsonify({"error": "Unauthorized Access","rc":"500"}), 400
 
@@ -63,6 +90,7 @@ def filterFood():
                 
                 # Create cleaned data object
                 cleaned_data = {
+                    "foodId": item_list[0],
                     "foodName": item_list[1],
                     "foodCat": item_list[2],
                     "foodCal": item_list[3],
@@ -73,7 +101,6 @@ def filterFood():
                 "food": cleaned_food_data
             }
             return jsonify({"message": "Success","data":data,"rc":"00"}), 200
-
         else:
             return jsonify({"error": "You must fill the favorite food categories","rc":"404"}), 404
     else:
