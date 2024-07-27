@@ -1,12 +1,13 @@
 from application import app
 from flask import Flask,request,jsonify
 from application.models.userModels import checkToken,updateUserBMI
-from application.models.foodModels import getFoodCat
+from application.models.foodModels import getFoodCat,createUserFavFoodCat,getUserFavFoodCat,updateUserFavFoodCat
 
 @app.route('/foodCat', methods = ['POST'])
 def foodCat():
     token = request.form['token']
     data = checkToken(token)
+    print(data)
     if data is not None:
         foodCat = getFoodCat()
         data = {
@@ -40,15 +41,29 @@ def updateBMI():
             return jsonify({"message": "Data updated","data":data,"rc":"00"}), 200
         else :
             return jsonify({"error": "Something when wrong","rc":"500"}), 500
-
     else:
         return jsonify({"error": "Unauthorized Access","rc":"500"}), 400
 
-@app.route('/addUserFoodCat', methods = ['POST'])
-def addFoodCat():
+@app.route('/setUserFavFoodCat', methods = ['POST'])
+def setUserFavFoodCat():
     token = request.form['token']
     data = checkToken(token)
     if data is not None:
         foodCat = request.form['foodCat']
+        dataFavFood = {
+            "user_id": data[0],
+            "food_cat" : foodCat,
+        }
+        userFoodFavCat = getUserFavFoodCat(data[0])
+        if userFoodFavCat is not None :
+            if updateUserFavFoodCat(dataFavFood):
+                return jsonify({"message": "Set User Favorite Categories Success","rc":"00"}), 201
+            else:
+                return jsonify({"error": "Failed to set user Favorite Categories Food","rc":"500"}), 500
+        else :
+            if createUserFavFoodCat(dataFavFood):
+                return jsonify({"message": "Set User Favorite Categories Success","rc":"00"}), 201
+            else:
+                return jsonify({"error": "Failed to set user Favorite Categories Food","rc":"500"}), 500
     else:
         return jsonify({"error": "Unauthorized Access","rc":"500"}), 400
