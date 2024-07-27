@@ -1,4 +1,5 @@
 from application import app
+import json
 from flask import Flask,request,jsonify
 from application.models.userModels import checkToken,updateUserBMI
 from application.models.foodModels import getFoodCat,createUserFavFoodCat,getUserFavFoodCat,updateUserFavFoodCat
@@ -7,13 +8,32 @@ from application.models.foodModels import getFoodCat,createUserFavFoodCat,getUse
 def foodCat():
     token = request.form['token']
     data = checkToken(token)
-    print(data)
     if data is not None:
         foodCat = getFoodCat()
         data = {
             "foodCat" : foodCat
         }
         return jsonify({"message": "Success","data":data,"rc":"00"}), 201
+    else:
+        return jsonify({"error": "Unauthorized Access","rc":"500"}), 400
+
+@app.route('/userFavFoodCat', methods = ['POST'])
+def userFavFoodCat():
+    token = request.form['token']
+    data = checkToken(token)
+    if data is not None:
+        userFoodFavCat = getUserFavFoodCat(data[0])
+        if userFoodFavCat is not None :
+            userFavFoodCat = json.loads(userFoodFavCat[2])  # Parse JSON string into a list
+            userFoodFavCat = list(set(userFavFoodCat))
+            
+            userFavFoodCatData = {
+                "userFoodFavCat" : userFoodFavCat
+            }
+
+            return jsonify({"message": "Success","data":userFavFoodCatData,"rc":"00"}), 201
+        else :
+            return jsonify({"error": "Data Not Found","rc":"404"}), 404
     else:
         return jsonify({"error": "Unauthorized Access","rc":"500"}), 400
 
