@@ -115,3 +115,24 @@ def updateToken(id, token):
                 cursor.close()
                 connection.close()
     return False  # Return False if the connection or cursor is None
+
+def updateUserBMI(id, BMI, bb, tb):
+    connection = get_connection()
+    if connection is not None:
+        cursor = get_cursor(connection)
+        if cursor is not None:
+            try:
+                # Query to update the token for the specified user ID
+                sql = """
+                UPDATE h_users SET BMI=%s, bb=%s, tb=%s  WHERE id = %s
+                """
+                cursor.execute(sql, (BMI, bb, tb, id))
+                connection.commit()  # Commit the transaction
+                return True  # Return True if a row was updated
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                return False  # Return False to indicate an error occurred
+            finally:
+                cursor.close()
+                connection.close()
+    return False  # Return False if the connection or cursor is None
