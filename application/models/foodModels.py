@@ -42,6 +42,30 @@ def getFood():
                 connection.close()
     return None
 
+def getFilterFood(foodCat):
+    connection = get_connection()
+    if connection is not None:
+        cursor = get_cursor(connection)
+        if cursor is not None:
+            try:
+                # Construct the SQL query to filter by food categories
+                # Construct the LIKE conditions for each category
+                conditions = " OR ".join([f"food_cat LIKE '%\"{cat}\"%'" for cat in foodCat])
+                sql = f"""
+                SELECT * FROM h_food
+                WHERE {conditions}
+                """
+                cursor.execute(sql)
+                result = cursor.fetchall()  # Fetch all results
+                return result  # Return the results (None if no rows found)
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                return None  # Return None to indicate an error occurred
+            finally:
+                cursor.close()
+                connection.close()
+    return None
+
 def createUserFavFoodCat(data):
     connection = get_connection()
     if connection is not None:
