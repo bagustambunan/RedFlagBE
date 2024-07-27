@@ -74,6 +74,8 @@ def login():
                 "email": result[2],
                 "phoneNo" : result[3],
                 "BMI" : result[8],
+                "bb" : result[9],
+                "tb" : result[10],
                 "token" : token
             }
             return jsonify({"message": "Login Success","data":data,"rc":"00"}), 200

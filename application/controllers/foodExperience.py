@@ -145,7 +145,9 @@ def updateBMI():
                 "email": newData[2],
                 "phoneNo" : newData[3],
                 "token" : token,
-                "BMI" : newData[8]
+                "BMI" : newData[8],
+                "bb" : newData[9],
+                "tb" : newData[10]
             }
             return jsonify({"message": "Data updated","data":data,"rc":"00"}), 201
         else :
