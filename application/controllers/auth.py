@@ -1,9 +1,10 @@
 from application import app
 from flask import Flask,request,jsonify
-from application.models.userModels import createUsers,checkUsers,getUsers
+from application.models.userModels import createUsers,checkUsers,getUsers,updateToken
 import hashlib
 import re
 from datetime import datetime
+import random
 
 @app.route('/', methods = ['GET'])
 def index():
@@ -59,13 +60,23 @@ def login():
 
     # Check if email or phone number already exists
     result = getUsers(email, hashPass)
-    if result:
-        data = {
-            "id": result[0],
-            "fullName": result[1],
-            "email": result[2],
-            "phoneNo" : result[3],
-        }
-        return jsonify({"message": "Login Success","data":data,"rc":"00"}), 200
+    if result:   
+        id = result[0]
+        rand = random.randint(1,99999)
+        combine = f"{id}{rand}"
+        hash_object = hashlib.sha1(combine.encode())
+        token = hash_object.hexdigest()
+        
+        if updateToken(id,token) is True:
+            data = {
+                "id": result[0],
+                "fullName": result[1],
+                "email": result[2],
+                "phoneNo" : result[3],
+                "token" : token
+            }
+            return jsonify({"message": "Login Success","data":data,"rc":"00"}), 200
+        else :
+            return jsonify({"error": "Something when wrong","rc":"500"}), 500
     else:
         return jsonify({"error": "Failed to login","rc":"500"}), 500

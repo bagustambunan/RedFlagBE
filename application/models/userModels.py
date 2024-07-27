@@ -44,7 +44,6 @@ def checkUsers(email, phoneNo):
                 """
                 cursor.execute(sql, (email, phoneNo))
                 result = cursor.fetchone()
-                print(result)
                 return result[0] > 0
             except Exception as e:
                 print(f"An error occurred: {e}")
@@ -53,6 +52,27 @@ def checkUsers(email, phoneNo):
                 cursor.close()
                 connection.close()
     return False
+
+def checkToken(token):
+    connection = get_connection()
+    if connection is not None:
+        cursor = get_cursor(connection)
+        if cursor is not None:
+            try:
+                # Query to check if the token exists
+                sql = """
+                SELECT * FROM h_users WHERE token = %s
+                """
+                cursor.execute(sql, (token,))  # Wrap token in a tuple
+                result = cursor.fetchone()
+                return result  # Return True if token exists, otherwise False
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                return False  # Return False to indicate an error occurred
+            finally:
+                cursor.close()
+                connection.close()
+    return False  # Return False if the connection or cursor is None
 
 def getUsers(email, password):
     connection = get_connection()
@@ -74,3 +94,24 @@ def getUsers(email, password):
                 cursor.close()
                 connection.close()
     return None
+
+def updateToken(id, token):
+    connection = get_connection()
+    if connection is not None:
+        cursor = get_cursor(connection)
+        if cursor is not None:
+            try:
+                # Query to update the token for the specified user ID
+                sql = """
+                UPDATE h_users SET token = %s WHERE id = %s
+                """
+                cursor.execute(sql, (token, id))
+                connection.commit()  # Commit the transaction
+                return True  # Return True if a row was updated
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                return False  # Return False to indicate an error occurred
+            finally:
+                cursor.close()
+                connection.close()
+    return False  # Return False if the connection or cursor is None
